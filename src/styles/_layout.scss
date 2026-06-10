@@ -1,0 +1,237 @@
+#scene-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-canvas);
+  display: block;
+}
+
+#vignette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-vignette);
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 65% at 50% 50%, transparent 35%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+.github-corner {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: var(--z-github);
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  background: rgba(255, 255, 255, 0.06);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  transition: background var(--dur-norm);
+  text-decoration: none;
+}
+
+.github-corner:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.github-corner img {
+  margin: 8px 8px 0 0;
+  opacity: 0.5;
+  filter: invert(1);
+  transition: opacity var(--dur-norm);
+}
+
+.github-corner:hover img {
+  opacity: 0.9;
+}
+
+#left-panel {
+  position: fixed;
+  top: var(--panel-gap);
+  left: var(--panel-gap);
+  bottom: calc(var(--timeline-h) + var(--panel-gap) + var(--panel-gap));
+  width: var(--panel-left-w);
+  z-index: var(--z-panels);
+  border-radius: var(--r-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slide-in-left var(--dur-slow) var(--ease-out) both;
+}
+
+#controls-panel {
+  position: fixed;
+  top: var(--panel-gap);
+  right: var(--panel-gap);
+  bottom: calc(var(--timeline-h) + var(--panel-gap) + var(--panel-gap));
+  width: var(--panel-right-w);
+  z-index: var(--z-panels);
+  border-radius: var(--r-lg);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  animation: slide-in-right var(--dur-slow) var(--ease-out) both;
+  padding: var(--sp-4);
+  gap: var(--sp-3);
+}
+
+#controls-panel::-webkit-scrollbar {
+  width: 3px;
+}
+
+#controls-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#controls-panel::-webkit-scrollbar-thumb {
+  background: var(--color-surface-hover);
+  border-radius: 2px;
+}
+
+#welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-welcome);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity var(--dur-slow);
+}
+
+#welcome-overlay.fade-out {
+  opacity: 0;
+}
+
+.welcome-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  pointer-events: auto;
+  padding: var(--sp-10) var(--sp-12);
+  border-radius: var(--r-xl);
+  background: radial-gradient(ellipse 100% 100% at 50% 50%,
+      rgba(12, 12, 16, 0.85) 0%, rgba(12, 12, 16, 0.4) 55%, transparent 100%);
+}
+
+.welcome-brand {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: 0.08em;
+}
+
+.welcome-brand span {
+  font-weight: 300;
+  opacity: 0.35;
+}
+
+.welcome-subtitle {
+  font-size: var(--text-md);
+  color: var(--color-text-secondary);
+  max-width: 340px;
+  line-height: 1.6;
+}
+
+.welcome-subtitle strong {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.welcome-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-6);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-full);
+  color: var(--color-text);
+  font-family: var(--font);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+
+.welcome-upload-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.welcome-privacy {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95)
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1)
+  }
+}
+
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px)
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0)
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-12px)
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0)
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(12px)
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0)
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg)
+  }
+}

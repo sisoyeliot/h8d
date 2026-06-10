@@ -8,16 +8,7 @@
     content="H8D — Client-side spatial 8D audio editor with keyframe timeline, powered by Web Audio API and Three.js" />
   <title>H8D · Spatial Audio Editor</title>
 
-  <link rel="stylesheet" href="styles.css" />
-
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
-    }
-  }
-  </script>
+  <link rel="stylesheet" href="/src/styles/main.scss" />
 </head>
 
 <body>
@@ -28,7 +19,7 @@
 
   <!-- Hidden file inputs -->
   <input type="file" id="file-input" accept="audio/*" multiple hidden />
-  <input type="file" id="file-input-welcome" accept="audio/*" multiple hidden />
+  <input type="file" id="file-input-project" accept=".h8d" hidden />
 
   <!-- #region GITHUB CORNER -->
   <a href="https://github.com/sisoyeliot" class="github-corner" target="_blank" rel="noopener"
@@ -39,11 +30,19 @@
 
 
   <!-- #region LEFT PANEL — Resources + Nodes -->
-  <aside id="left-panel" class="glass-panel">
+  <aside id="left-panel" class="glass-panel" hidden>
 
     <!-- Brand -->
-    <div class="brand-row">
+    <div class="brand-row" style="display:flex; justify-content:space-between; align-items:center;">
       <div class="brand-mark">H8D<span>.audio</span></div>
+      <div style="display:flex; gap: 4px;">
+        <button id="btn-new-project" class="btn btn--icon-sm" title="New Project" aria-label="New Project">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        </button>
+        <button id="btn-open-project" class="btn btn--icon-sm" title="Open Project" aria-label="Open Project">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        </button>
+      </div>
     </div>
 
     <!-- Resources Section -->
@@ -83,16 +82,6 @@
       </div>
     </div>
 
-    <!-- Legend -->
-    <div class="legend">
-      <div class="legend-title">Orientation</div>
-      <div class="legend-items">
-        <div class="legend-item"><span class="legend-arrow" style="color:#67e8f9">◀</span><span>Left</span></div>
-        <div class="legend-item"><span class="legend-arrow" style="color:#fb923c">▶</span><span>Right</span></div>
-        <div class="legend-item"><span class="legend-arrow" style="color:#6ee7b7">▲</span><span>Up</span></div>
-        <div class="legend-item"><span class="legend-arrow" style="color:#a78bfa">▼</span><span>Down</span></div>
-      </div>
-    </div>
   </aside>
   <!-- #endregion -->
 
@@ -104,11 +93,9 @@
     <!-- Track Selection -->
     <div class="control-group">
       <span class="control-label">Track</span>
-      <button id="btn-track-select" class="btn--track-select">
-        <span id="track-select-label">None</span>
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-          stroke-linecap="round"><polyline points="9 18 15 12 9 6" /></svg>
-      </button>
+      <select id="track-select" class="dropdown-select">
+        <option value="">None</option>
+      </select>
     </div>
 
     <hr class="panel-divider" />
@@ -215,14 +202,16 @@
       <p class="welcome-subtitle">
         Spatial audio editor — position sounds in 3D space and export to 8D stereo.
       </p>
-      <button id="btn-welcome-upload" class="welcome-upload-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-        Load Audio
-      </button>
+      <div style="display:flex; justify-content:center; gap:var(--sp-4); margin-top:var(--sp-6);">
+        <button id="btn-welcome-new" class="welcome-upload-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          New Project
+        </button>
+        <button id="btn-welcome-import" class="welcome-upload-btn" style="background:var(--color-surface); color:var(--color-text);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Open Project
+        </button>
+      </div>
       <div class="welcome-privacy">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
@@ -250,11 +239,7 @@
       <span class="time-sep">/</span>
       <span id="time-total" class="time-label">0:00</span>
       <div class="timeline-transport__spacer"></div>
-      <label class="control-label" style="gap:var(--sp-2);font-size:var(--text-xs)">
-        <span style="color:var(--color-text-tertiary)">Duration</span>
-        <input type="number" id="input-duration" class="duration-input" min="1" max="600" value="60" step="1" />
-        <span style="color:var(--color-text-dim)">s</span>
-      </label>
+
       <button id="btn-export" class="btn btn--accent" aria-label="Export 8D" disabled>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
@@ -271,37 +256,46 @@
   <!-- #endregion -->
 
 
-  <!-- #region RESOURCE PICKER MODAL -->
-  <div id="resource-picker" class="modal-backdrop" hidden>
-    <div class="resource-picker glass-panel">
-      <div class="resource-picker__header">
-        <span class="resource-picker__title">Select Track</span>
-        <button id="btn-close-picker" class="btn btn--icon-sm" aria-label="Close">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-        </button>
-      </div>
-      <div id="picker-list" class="resource-picker__list">
-        <button class="picker-item picker-item--none active" data-resource-id="">
-          <span class="picker-item__icon">—</span>
-          <span class="picker-item__name">None</span>
-        </button>
-      </div>
-      <div class="resource-picker__footer">
-        <button id="btn-picker-load" class="btn btn--ghost btn--full">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+
+
+
+  <!-- #region EXPORT CHOICE MODAL -->
+  <div id="export-choice-modal" class="modal-backdrop" hidden>
+    <div class="modal glass-panel">
+      <h3 class="modal__title">Export Project</h3>
+      <p class="modal__subtitle">Select export format</p>
+      
+      <div style="display:flex; flex-direction:column; gap:var(--sp-3); margin-top:var(--sp-4);">
+        <button id="btn-export-choice-project" class="btn btn--ghost" style="justify-content: flex-start; padding: 12px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:12px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          Load New Track
+          <div style="text-align:left;">
+            <div style="font-weight:600; color:var(--color-text);">Export H8D Project (.h8d)</div>
+            <div style="font-size:var(--text-xs); color:var(--color-text-tertiary); margin-top:2px;">Saves the full project including all audio files and automation.</div>
+          </div>
+        </button>
+
+        <button id="btn-export-choice-audio" class="btn btn--ghost" style="justify-content: flex-start; padding: 12px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" style="margin-right:12px;">
+            <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+          </svg>
+          <div style="text-align:left;">
+            <div style="font-weight:600; color:var(--color-accent);">Export Final Audio (.wav)</div>
+            <div style="font-size:var(--text-xs); color:var(--color-text-tertiary); margin-top:2px;">Renders the 8D audio result into a stereo WAV file.</div>
+          </div>
         </button>
       </div>
+
+      <button id="btn-export-choice-cancel" class="btn btn--ghost btn--full" style="margin-top:var(--sp-4); opacity: 0.7;">
+        Cancel
+      </button>
     </div>
   </div>
   <!-- #endregion -->
 
-
-  <!-- #region EXPORT MODAL -->
+  <!-- #region EXPORT RENDER MODAL -->
   <div id="export-modal" class="modal-backdrop" hidden>
     <div class="modal glass-panel">
       <div class="modal__spinner"></div>
@@ -315,7 +309,7 @@
   </div>
   <!-- #endregion -->
 
-  <script type="module" src="./scripts/main.js"></script>
+  <script type="module" src="/src/main.ts"></script>
 
 </body>
 </html>

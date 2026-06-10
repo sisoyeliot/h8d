@@ -1,0 +1,17 @@
+@use 'variables';
+@use 'reset';
+@use 'layout';
+@use 'components';
+@use 'timeline';
+
+body.drag-over::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  border: 2px dashed rgba(255, 255, 255, 0.25);
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.02);
+  pointer-events: none;
+  animation: fade-in var(--dur-fast) both;
+}
