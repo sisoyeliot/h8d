@@ -269,7 +269,7 @@ export class Visualizer {
     }
   }
 
-  render(deltaTime: number, bassEnergy = 0, midEnergy = 0, activeNodeIds = new Set<number>()) {
+  render(deltaTime: number, bassEnergy = 0, _midEnergy = 0, activeNodeIds = new Set<number>(), nodeEnergies = new Map<number, { bass: number; mid: number }>()) {
     if (this._headGroup) {
       this._headGroup.rotation.y += deltaTime * 0.1;
       this._headGroup.rotation.x += deltaTime * 0.05;
@@ -293,8 +293,9 @@ export class Visualizer {
       const isSelected = (id === this._selectedNodeId);
       const isActive = activeNodeIds.has(id);
 
-      const bass = isActive ? bassEnergy : 0;
-      const mid  = isActive ? midEnergy  : 0;
+      const energy = nodeEnergies.get(id);
+      const bass = energy ? energy.bass : 0;
+      const mid  = energy ? energy.mid  : 0;
 
       const scale = 1 + bass * 0.5;
       node.orb.scale.setScalar(scale);

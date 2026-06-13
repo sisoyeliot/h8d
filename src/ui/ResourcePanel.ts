@@ -24,6 +24,10 @@ export class ResourcePanel {
     store.on('selectionChanged', () => {
       this._renderNodes();
     });
+
+    store.on('resourcesChanged', () => {
+      this._rebuildResourceList();
+    });
   }
 
   private _bindEvents() {
@@ -116,7 +120,24 @@ export class ResourcePanel {
     this._list.appendChild(div);
   }
 
-
+  private _rebuildResourceList() {
+    // Clear existing resource items from the DOM
+    const items = this._list.querySelectorAll('.resource-item');
+    items.forEach(item => item.remove());
+    
+    // Get all resources from the engine and re-add them
+    const resources = this.audio.getResources();
+    if (resources.length === 0) {
+      this._empty.hidden = false;
+    } else {
+      this._empty.hidden = true;
+      for (const info of resources) {
+        this._addResourceToUI(info);
+      }
+      this._btnAddNode.disabled = false;
+      this._btnAddNode.title = 'Add a new spatial node';
+    }
+  }
 
   private _togglePreview(id: number, btn: HTMLElement) {
     if (this._previewSource && this._previewResourceId === id) {

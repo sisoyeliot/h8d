@@ -12,6 +12,8 @@ type AudioResource = AudioResourceInfo & {
 type AudioNodeState = {
   pannerNode: PannerNode;
   gainNode: GainNode;
+  analyserNode: AnalyserNode;
+  frequencyData: Uint8Array;
   activeSources: Set<AudioBufferSourceNode>;
   clips: any[];
   volume: number;
@@ -138,12 +140,21 @@ export class AudioEngine {
     const gainNode = this._ctx!.createGain();
     gainNode.gain.value = 1.0;
 
+    const analyserNode = this._ctx!.createAnalyser();
+    analyserNode.fftSize = 256;
+    analyserNode.smoothingTimeConstant = 0.8;
+    const frequencyData = new Uint8Array(analyserNode.frequencyBinCount);
+
+    // Chain: source -> panner -> gain -> analyser -> mixer
     pannerNode.connect(gainNode);
-    gainNode.connect(this._mixerGain!);
+    gainNode.connect(analyserNode);
+    analyserNode.connect(this._mixerGain!);
 
     this._nodes.set(nodeId, {
       pannerNode,
       gainNode,
+      analyserNode,
+      frequencyData,
       activeSources: new Set(),
       clips: [],
       volume: 1.0,
@@ -170,6 +181,7 @@ export class AudioEngine {
 
     node.pannerNode.disconnect();
     node.gainNode.disconnect();
+    node.analyserNode.disconnect();
     this._nodes.delete(nodeId);
   }
 
@@ -344,7 +356,15 @@ export class AudioEngine {
     return this._frequencyData;
   }
 
+  getNodeFrequencyData(nodeId: number): Uint8Array | null {
+    const node = this._nodes.get(nodeId);
+    if (!node) return null;
+    node.analyserNode.getByteFrequencyData(node.frequencyData as any);
+    return node.frequencyData;
+  }
+
   async exportToWav(options: { nodeMovements: any[]; onProgress?: (p: number) => void }): Promise<Blob> {
+    this._initContext();
     let maxDuration = 0;
     let sampleRate = 44100;
     const validMovements: any[] = [];
@@ -378,13 +398,14 @@ export class AudioEngine {
       panner.coneInnerAngle = 360;
       panner.coneOuterAngle = 360;
 
+      const gain = offlineCtx.createGain();
+      source.connect(panner);
+      panner.connect(gain);
+      gain.connect(offlineCtx.destination);
+
       if (nm.keyframes && nm.keyframes.length > 0 && panner.positionX) {
         const stepsPerSec = 10;
         const totalSteps = Math.ceil(nm.clip.duration * stepsPerSec);
-        const gain = offlineCtx.createGain();
-        source.connect(panner);
-        panner.connect(gain);
-        gain.connect(offlineCtx.destination);
 
         for (let i = 0; i <= totalSteps; i++) {
           const t = nm.clip.start + (i / totalSteps) * nm.clip.duration;
@@ -398,13 +419,23 @@ export class AudioEngine {
           panner.positionZ.linearRampToValueAtTime(z, timeToSet);
           gain.gain.linearRampToValueAtTime(state.muted ? 0 : state.volume, timeToSet);
         }
-
-        source.start(nm.clip.start, nm.clip.offset, nm.clip.duration);
-      } else {
-        source.connect(panner);
-        panner.connect(offlineCtx.destination);
-        source.start(nm.clip.start, nm.clip.offset, nm.clip.duration);
+      } else if (nm.initialState) {
+        // Apply static spatial position from initialState
+        const s = nm.initialState;
+        const rad = s.angle * Math.PI / 180;
+        const x = Math.sin(rad) * s.distance;
+        const z = Math.cos(rad) * s.distance;
+        if (panner.positionX) {
+          panner.positionX.value = x;
+          panner.positionY.value = s.height;
+          panner.positionZ.value = z;
+        } else {
+          panner.setPosition(x, s.height, z);
+        }
+        gain.gain.value = s.muted ? 0 : s.volume;
       }
+
+      source.start(nm.clip.start, nm.clip.offset, nm.clip.duration);
     }
 
     let progressInterval: number | undefined;

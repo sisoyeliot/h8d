@@ -30,6 +30,7 @@ type StateEvents = {
   playbackChanged: (isPlaying: boolean) => void;
   durationChanged: (duration: number) => void;
   timeUpdate: (time: number) => void;
+  resourcesChanged: () => void;
 };
 
 export class StateStore {

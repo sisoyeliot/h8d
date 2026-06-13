@@ -94,13 +94,22 @@ function loop() {
   }
 
   const activeIds = new Set<number>();
+  const nodeEnergies = new Map<number, { bass: number; mid: number }>();
   for (const [id, node] of store.nodes) {
     syncNodePosition(id, time);
-    if (node.resourceId && store.isPlaying) {
+    if (store.isPlaying && node.clips.some(clip => time >= clip.start && time < clip.start + clip.duration)) {
       activeIds.add(id);
+      const fq = audio.getNodeFrequencyData(id);
+      if (fq) {
+        nodeEnergies.set(id, {
+          bass: (fq[1] + fq[2] + fq[3]) / 3 / 255,
+          mid:  (fq[10] + fq[15] + fq[20]) / 3 / 255,
+        });
+      }
     }
   }
 
+  // Global energy for head/ambient effects
   const fq = audio.getFrequencyData();
   let b = 0, m = 0;
   if (fq) {
@@ -108,14 +117,13 @@ function loop() {
     m = (fq[10] + fq[15] + fq[20]) / 3 / 255;
   }
   
-  viz.render(dt, b, m, activeIds);
+  viz.render(dt, b, m, activeIds, nodeEnergies);
 }
 
 const renderedNodes = new Set<number>();
 
 store.on('nodesChanged', () => {
   document.getElementById('time-total')!.textContent = formatTime(store.projectDuration);
-  document.getElementById('btn-export')!.toggleAttribute('disabled', !audio.hasAssignedTracks);
   
   const currentIds = new Set(store.nodes.keys());
 
@@ -141,6 +149,9 @@ store.on('nodesChanged', () => {
       renderedNodes.delete(id);
     }
   }
+
+  // Check after nodes are created and clips assigned
+  document.getElementById('btn-export')!.toggleAttribute('disabled', !audio.hasAssignedTracks);
 });
 
 store.on('selectionChanged', (id) => {
@@ -293,7 +304,8 @@ document.getElementById('btn-export-choice-audio')!.addEventListener('click', as
   const mvs = Array.from(store.nodes.values()).map(n => ({
     clips: n.clips,
     duration: store.projectDuration,
-    keyframes: n.keyframes
+    keyframes: n.keyframes,
+    initialState: n.initialState
   }));
 
   try {
@@ -386,8 +398,11 @@ document.getElementById('file-input-project')!.addEventListener('change', async 
       store.nodes.set(id, node);
     }
     
-    store.emit('nodesChanged');
+    // Update the nextNodeId so new nodes don't collide with imported ones
+    const maxNodeId = Math.max(...state.nodes.map(([id]: [number, any]) => id), 0);
+    if (maxNodeId >= store.nextNodeId) store.nextNodeId = maxNodeId + 1;
     
+    store.emit('resourcesChanged');
     store.emit('nodesChanged');
     startApp();
     
