@@ -7,6 +7,35 @@
 
 H8D is a fully client-side spatial 8D audio editor with a keyframe timeline, powered by the Web Audio API and Three.js. It allows you to position sounds in 3D space, automate their movement, and export the result directly to an 8D stereo WAV file.
 
+## Preview
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="./assets/welcome-page.png" width="400" alt="Welcome Page">
+      <br>
+      <i>Welcome Page</i>
+    </td>
+    <td align="center">
+      <img src="./assets/empty-project.png" width="400" alt="Empty Project">
+      <br>
+      <i>Empty Project</i>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./assets/project%20with%20a%20single%20node.png" width="400" alt="Project with a Single Node">
+      <br>
+      <i>Single Node</i>
+    </td>
+    <td align="center">
+      <img src="./assets/project%20with%20multiple%20nodes.png" width="400" alt="Project with Multiple Nodes">
+      <br>
+      <i>Multiple Nodes</i>
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 - **Spatial 3D Audio Engine:** Position any audio track in a 3D environment by manipulating angle, distance, and height natively using the Web Audio API.
